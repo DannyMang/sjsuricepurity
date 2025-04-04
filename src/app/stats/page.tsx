@@ -36,9 +36,9 @@ export default function StatsPage() {
         const data = await response.json();
         console.log('Stats data:', data);
         setStats(data);
-      } catch (err) {
+      } catch (err: unknown) {
         console.error('Detailed fetch error:', err);
-        setError(`Error loading statistics: ${err.message}`);
+        setError(`Error loading statistics: ${err instanceof Error ? err.message : 'Unknown error'}`);
       } finally {
         setLoading(false);
       }
