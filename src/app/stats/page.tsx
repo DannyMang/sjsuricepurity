@@ -23,15 +23,22 @@ export default function StatsPage() {
   useEffect(() => {
     const fetchStats = async () => {
       try {
+        console.log('Fetching stats...');
         const response = await fetch('/api/stats');
+        console.log('Response status:', response.status);
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch statistics');
+          const errorData = await response.json();
+          console.error('Error response:', errorData);
+          throw new Error(`Failed to fetch statistics: ${errorData.details || 'Unknown error'}`);
         }
+        
         const data = await response.json();
+        console.log('Stats data:', data);
         setStats(data);
       } catch (err) {
-        setError('Error loading statistics. Please try again later.');
-        console.error(err);
+        console.error('Detailed fetch error:', err);
+        setError(`Error loading statistics: ${err.message}`);
       } finally {
         setLoading(false);
       }

@@ -105,16 +105,25 @@ const questions = [
   "Got rejected from every UC?"
 ];
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export async function GET() {
   try {
+    console.log('Attempting to connect to MongoDB...');
     await connectDB();
+    console.log('Successfully connected to MongoDB');
 
     const totalTests = await TestResult.countDocuments();
+    console.log('Total tests:', totalTests);
+
     const aggregateResult = await TestResult.aggregate([
       { $group: { _id: null, averageScore: { $avg: '$score' } } }
     ]);
-    const averageScore = aggregateResult[0]?.averageScore || 0;
+    console.log('Aggregate result:', aggregateResult);
 
+    const averageScore = aggregateResult[0]?.averageScore || 0;
+    
     const questionStats = await TestResult.aggregate([
       { $unwind: { path: '$answers', includeArrayIndex: 'questionIndex' } },
       {
@@ -125,6 +134,7 @@ export async function GET() {
       },
       { $sort: { _id: 1 } }
     ]);
+    console.log('Question stats:', questionStats);
 
     return NextResponse.json({
       totalTests,
@@ -136,9 +146,9 @@ export async function GET() {
       }))
     });
   } catch (error) {
-    console.error('Error fetching statistics:', error);
+    console.error('Detailed error in stats route:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch statistics' },
+      { error: 'Failed to fetch statistics', details: (error as Error).message },
       { status: 500 }
     );
   }
