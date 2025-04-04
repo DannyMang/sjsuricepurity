@@ -7,6 +7,7 @@ import Image from 'next/image';
 export default function Home() {
   const router = useRouter();
   const [answers, setAnswers] = useState<boolean[]>(new Array(100).fill(false));
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const questions = [
     "Current student at SJSU?",
@@ -112,6 +113,7 @@ export default function Home() {
   ];
 
   const handleSubmit = async () => {
+    setIsSubmitting(true);
     const checkedCount = answers.filter(Boolean).length;
     const score = Math.round(((questions.length - checkedCount) / questions.length) * 100);
 
@@ -135,6 +137,8 @@ export default function Home() {
     } catch (error) {
       console.error('Error submitting results:', error);
       router.push(`/results?score=${score}`);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -255,22 +259,46 @@ export default function Home() {
         <div style={{ textAlign: "center", marginTop: "2rem" }}>
           <button
             onClick={handleSubmit}
+            disabled={isSubmitting}
             style={{
-              backgroundColor: "#8b0000",
+              backgroundColor: isSubmitting ? "#a0a0a0" : "#8b0000",
               color: "white",
-              border: "1px solid #8b0000",
+              border: `1px solid ${isSubmitting ? "#a0a0a0" : "#8b0000"}`,
               borderRadius: "0",
               padding: "8px 20px",
               fontFamily: "Times New Roman, Times, serif",
               fontSize: "1.3rem",
               fontWeight: "700",
-              cursor: "pointer"
+              cursor: isSubmitting ? "not-allowed" : "pointer",
+              position: "relative",
+              minWidth: "200px"
             }}
           >
-            Calculate My Score
+            {isSubmitting ? (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "10px" }}>
+                <div style={{ 
+                  width: "20px", 
+                  height: "20px", 
+                  border: "3px solid #ffffff",
+                  borderTop: "3px solid transparent",
+                  borderRadius: "50%",
+                  animation: "spin 1s linear infinite"
+                }} />
+                <span>Calculating...</span>
+              </div>
+            ) : (
+              "Calculate My Score"
+            )}
           </button>
         </div>
       </div>
+
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </main>
   );
 }
