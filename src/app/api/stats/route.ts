@@ -40,7 +40,69 @@ const questions = [
   "Pulled an all-nighter to finish a project or study for an exam?",
   "Dropped a class after the first week?",
   "Changed your major?",
-  "Ate Panda for a week straight?"
+  "Ate Panda for a week straight?",
+  "Went to the SRAC?",
+  "Went to the SRAC but went back cause it was too crowded?",
+  "Ate @ the best food spot on campus (Halal Shack) for a week straight?",
+  "Ate DC food?",
+  "Commuter student?",
+  "Couldn't find parking on first day of campus?",
+  "Went to a career fair on campus?",
+  "Got a job/internship from the career fair?",
+  "Went to SpartanFest?",
+  "Forgot student ID?",
+  "Forgot student ID at the door and had to awkwardly wait until someone opened it for you?",
+  "Stopped by somebody on 7th Street?",
+  "Had to table on 7th Street?",
+  "Played intramural sports with classmates or friends?",
+  "Taken a picture with Sammy?",
+  "Has ever used the Sammy app?",
+  "Joined a frat/soroity?",
+  "Joined a sorority?",
+  "Went bowling in the SU?",
+  "Taken the South campus garage bus?",
+  "Held hands w/ someone on campus?",
+  "Kissed someone on campus?",
+  "Been on a date w/ someone on campus?",
+  "Been on a date/ taken on a date to Westfield Valley Fair?",
+  "Slept in car during school?",
+  "Got a parking ticket?",
+  "Had class scheduling date so bad that you ended up taking a professer with < 1.0 on RMP?",
+  "Taken a picture with Sammy?",
+  "Used a LYFT/ Lime scooter?",
+  "Active user of the r/SJSU reddit?",
+  "Active user on the SJSU Discord?",
+  "Was in the SU during the Panda Express fire?",
+  "Ate Taco Bell for a week straight?",
+  "Tried the campus sushi?",
+  "Tried the Ginger Market boba?",
+  "Tried Tea Degree?",
+  "Tried Campus Burger?",
+  "Ride a scooter on campus?",
+  "Had to carry a group project?",
+  "Been the one that got carried in a group project?",
+  "Placed a review on RMP?",
+  "Hated a professor so much you had to let it all out on RMP?",
+  "Organized an event on campus?",
+  "Been part of student gov/ council?",
+  "Held a leadership position in a student org?",
+  "Have a big/little in a sorority/frat/club?",
+  "Dated their big/little in a sorority/frat/club?",
+  "Pulled an all-nighter for an assignment or exam?",
+  "Attended a lecture without doing the assigned reading?",
+  "Been to an SJSU football game at CEFCU Stadium?",
+  "Had a crush on one of your professors or TAs?",
+  "Parked illegally near campus or even in the employee parking?",
+  "Visited Christmas in the Park during winter break season?",
+  "Gone ice skating at Downtown Ice near campus?",
+  "Had a roommate conflict while living in student housing?",
+  "Gone on a date with someone from another Bay Area university (e.g., Stanford, UC Berkeley)?",
+  "Dated a professor/ TA?",
+  "Played basketball or volleyball at SRAC courts?",
+  "Walked under the Student Union archway?",
+  "Spent >1 hr in a parking structure to secure a parking spot?",
+  "Car hit in parking lot?",
+  "Got rejected from every UC?"
 ];
 
 export async function GET() {
@@ -64,7 +126,7 @@ export async function GET() {
       { $sort: { _id: 1 } }
     ]);
 
-    const stats = {
+    return NextResponse.json({
       totalTests,
       averageScore,
       questionStats: questionStats.map(stat => ({
@@ -72,9 +134,7 @@ export async function GET() {
         count: stat.count,
         percentage: stat.count / totalTests
       }))
-    };
-
-    return NextResponse.json(stats);
+    });
   } catch (error) {
     console.error('Error fetching statistics:', error);
     return NextResponse.json(
