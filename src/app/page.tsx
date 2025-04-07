@@ -168,6 +168,8 @@ export default function Home() {
       }}>
         <div style={{ textAlign: "center", marginBottom: "1.3rem" }}>
           <Image
+            width={600}
+            height={200}
             src="/sjsuricepurity.png" 
             alt="The Official SJSU Purity Test"
             style={{ 

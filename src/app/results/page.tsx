@@ -37,6 +37,8 @@ function ResultsContent() {
         <Image 
           src="/sjsuricepurity.png" 
           alt="The Official SJSU Purity Test"
+          width={600}
+          height={200}
           style={{ 
             maxWidth: "600px", 
             width: "100%", 
@@ -116,6 +118,36 @@ function ResultsContent() {
           >
             View Statistics
           </Link>
+          <div style={{
+            marginTop: "2rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            color: "#000",
+            fontSize: "1.1rem"
+          }}>
+            <span>Add me on</span>
+            <a
+              href="https://x.com/danielung19"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.25rem",
+                color: "#000",
+                textDecoration: "none"
+              }}
+            >
+              <Image
+                src="/x.png"
+                alt="X (formerly Twitter) logo"
+                width={20}
+                height={20}
+              />
+              <span style={{ fontWeight: "bold" }}>! </span>
+            </a>
+          </div>
         </div>
       </div>
     </div>
