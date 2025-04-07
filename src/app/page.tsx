@@ -192,8 +192,7 @@ export default function Home() {
           color: "#000"
         }}>
           The first ever SJSU Purity Test. Serving as a way for students to bond and track 
-          their experiences throughout their time at San Jose State University. It is a 
-          voluntary opportunity for students to reflect on their unique university journey.
+          their experiences throughout their time at San Jose State University. Inspired by https://www.utdpuritytest.com/!
         </div>
 
         <p style={{ 
