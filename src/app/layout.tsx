@@ -16,7 +16,7 @@ export const metadata: Metadata = {
   title: "SJSU Purity Test",
   description: "The first ever SJSU Purity Test. Track your experiences throughout your time at San Jose State University!",
   icons: [
-    { rel: 'icon', url: '/favicon.ico', sizes: 'any' },
+    { rel: 'icon', url: '/icon.ico', sizes: 'any' },
     { rel: 'icon', url: '/logo.png', type: 'image/png' },
     { rel: 'apple-touch-icon', url: '/logo.png' },
   ],
