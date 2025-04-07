@@ -15,10 +15,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "SJSU Purity Test",
   description: "The first ever SJSU Purity Test. Track your experiences throughout your time at San Jose State University!",
-  icons: {
-    icon: '/logo.png',
-    apple: '/logo.png',
-  },
+  icons: [
+    { rel: 'icon', url: '/favicon.ico', sizes: 'any' },
+    { rel: 'icon', url: '/logo.png', type: 'image/png' },
+    { rel: 'apple-touch-icon', url: '/logo.png' },
+  ],
 };
 
 export default function RootLayout({
