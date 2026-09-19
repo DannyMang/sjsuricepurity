@@ -2,14 +2,57 @@
 
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import Image from 'next/image';
+
+function percentileLabel(value: number) {
+  const remainder = value % 100;
+  if (remainder >= 11 && remainder <= 13) {
+    return `${value}th`;
+  }
+
+  switch (value % 10) {
+    case 1:
+      return `${value}st`;
+    case 2:
+      return `${value}nd`;
+    case 3:
+      return `${value}rd`;
+    default:
+      return `${value}th`;
+  }
+}
 
 // Create a client component that uses useSearchParams
 function ResultsContent() {
   const searchParams = useSearchParams();
   const score = searchParams.get('score');
   const [copied, setCopied] = useState(false);
+  const [percentile, setPercentile] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (score === null || score === '') {
+      return;
+    }
+
+    const fetchPercentile = async () => {
+      try {
+        const response = await fetch(`/api/percentile?score=${encodeURIComponent(score)}`);
+        if (!response.ok) {
+          return;
+        }
+
+        const data = await response.json();
+        if (typeof data.percentile === 'number') {
+          setPercentile(data.percentile);
+        }
+      } catch (error) {
+        console.error('Error loading percentile:', error);
+      }
+    };
+
+    fetchPercentile();
+  }, [score]);
 
   const shareResult = () => {
     const shareText = `I got ${score} on the SJSU Purity Test! Try it yourself:`;
@@ -60,11 +103,22 @@ function ResultsContent() {
         <div style={{ 
           fontSize: "3.5rem", 
           fontWeight: "bold", 
-          marginBottom: "3rem",
+          marginBottom: percentile === null ? "2.25rem" : "0.4rem",
           color: "#000"
         }}>
           {score}
         </div>
+
+        {percentile !== null && (
+          <p style={{
+            fontSize: "1rem",
+            fontStyle: "italic",
+            marginBottom: "1.75rem",
+            color: "#000"
+          }}>
+            That's the {percentileLabel(percentile)} percentile of test takers.
+          </p>
+        )}
 
         <div style={{ 
           display: "flex", 
@@ -105,7 +159,7 @@ function ResultsContent() {
             </Link>
           </div>
           <Link
-            href="/stats"
+            href={score ? `/stats?score=${encodeURIComponent(score)}` : '/stats'}
             style={{
               border: "2px solid #8b0000",
               color: "#8b0000",
@@ -121,32 +175,39 @@ function ResultsContent() {
           <div style={{
             marginTop: "2rem",
             display: "flex",
+            flexDirection: "column",
             alignItems: "center",
-            gap: "0.5rem",
+            justifyContent: "center",
+            gap: "0.35rem",
             color: "#000",
             fontSize: "1.1rem"
           }}>
-            <span>Add me on</span>
-            <a
-              href="https://x.com/danielung19"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.25rem",
-                color: "#000",
-                textDecoration: "none"
-              }}
-            >
-              <Image
-                src="/x.png"
-                alt="X (formerly Twitter) logo"
-                width={20}
-                height={20}
-              />
-              <span style={{ fontWeight: "bold" }}>! </span>
-            </a>
+            <span>Updated by Rachel.</span>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "0.5rem"
+            }}>
+              <span>Originally created by Daniel U.</span>
+              <a
+                href="https://x.com/danielung19"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  lineHeight: 0
+                }}
+              >
+                <Image
+                  src="/x.png"
+                  alt="Daniel U. on X"
+                  width={20}
+                  height={20}
+                />
+              </a>
+            </div>
           </div>
         </div>
       </div>

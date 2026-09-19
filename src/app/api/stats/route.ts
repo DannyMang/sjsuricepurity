@@ -105,8 +105,42 @@ const questions = [
   "Got rejected from every UC?"
 ];
 
+const SCORE_RANGES = ['0-20', '20-40', '40-60', '60-80', '80-100'] as const;
+
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+
+function mapQuestionStat(stat: { question: string; count: number }, totalTests: number) {
+  return {
+    question: stat.question,
+    count: stat.count,
+    percentage: totalTests > 0 ? stat.count / totalTests : 0
+  };
+}
+
+async function getMedianScore(totalTests: number) {
+  if (totalTests === 0) {
+    return 0;
+  }
+
+  const middleIndex = Math.floor((totalTests - 1) / 2);
+  const docs = await TestResult.find()
+    .sort({ score: 1 })
+    .skip(middleIndex)
+    .limit(totalTests % 2 === 0 ? 2 : 1)
+    .select('score')
+    .lean();
+
+  if (docs.length === 0) {
+    return 0;
+  }
+
+  if (docs.length === 1) {
+    return docs[0].score ?? 0;
+  }
+
+  return ((docs[0].score ?? 0) + (docs[1].score ?? 0)) / 2;
+}
 
 export async function GET() {
   try {
@@ -115,15 +149,9 @@ export async function GET() {
     console.log('Successfully connected to MongoDB');
 
     const totalTests = await TestResult.countDocuments();
-    console.log('Total tests:', totalTests);
+    const medianScore = await getMedianScore(totalTests);
+    console.log('Total tests:', totalTests, 'Median score:', medianScore);
 
-    const aggregateResult = await TestResult.aggregate([
-      { $group: { _id: null, averageScore: { $avg: '$score' } } }
-    ]);
-    console.log('Aggregate result:', aggregateResult);
-
-    const averageScore = aggregateResult[0]?.averageScore || 0;
-    
     const questionStats = await TestResult.aggregate([
       { $unwind: { path: '$answers', includeArrayIndex: 'questionIndex' } },
       {
@@ -136,14 +164,59 @@ export async function GET() {
     ]);
     console.log('Question stats:', questionStats);
 
+    const countsByIndex = new Map<number, number>(
+      questionStats.map((stat) => [stat._id as number, stat.count as number])
+    );
+
+    const allQuestionStats = questions.map((question, index) => ({
+      question,
+      count: countsByIndex.get(index) ?? 0
+    }));
+
+    const mostSelected = [...allQuestionStats]
+      .sort((a, b) => b.count - a.count || a.question.localeCompare(b.question))
+      .slice(0, 3)
+      .map((stat) => mapQuestionStat(stat, totalTests));
+
+    const leastSelected = [...allQuestionStats]
+      .sort((a, b) => a.count - b.count || a.question.localeCompare(b.question))
+      .slice(0, 3)
+      .map((stat) => mapQuestionStat(stat, totalTests));
+
+    const scoreCounts = await TestResult.aggregate([
+      {
+        $group: {
+          _id: {
+            $switch: {
+              branches: [
+                { case: { $lte: ['$score', 20] }, then: '0-20' },
+                { case: { $lte: ['$score', 40] }, then: '20-40' },
+                { case: { $lte: ['$score', 60] }, then: '40-60' },
+                { case: { $lte: ['$score', 80] }, then: '60-80' }
+              ],
+              default: '80-100'
+            }
+          },
+          count: { $sum: 1 }
+        }
+      }
+    ]);
+
+    const scoreCountByRange = new Map<string, number>(
+      scoreCounts.map((bucket) => [String(bucket._id), bucket.count as number])
+    );
+
+    const scoreDistribution = SCORE_RANGES.map((range) => ({
+      range,
+      count: scoreCountByRange.get(range) ?? 0
+    }));
+
     return NextResponse.json({
       totalTests,
-      averageScore,
-      questionStats: questionStats.map(stat => ({
-        question: questions[stat._id] || `Question ${stat._id + 1}`,
-        count: stat.count,
-        percentage: stat.count / totalTests
-      }))
+      medianScore,
+      mostSelected,
+      leastSelected,
+      scoreDistribution
     });
   } catch (error) {
     console.error('Detailed error in stats route:', error);
@@ -152,4 +225,4 @@ export async function GET() {
       { status: 500 }
     );
   }
-} 
+}
